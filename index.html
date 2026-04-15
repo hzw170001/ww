@@ -3,62 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的doro网页</title>
+    <title>爱吃粑粑</title>
     <style>
-        *{
+        /* 全局重置，强制覆盖所有默认样式 */
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
         }
-        body{
-            min-height: 100vh;
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background-color: #f0f8ff;
-            font-family: "微软雅黑",sans-serif;
-            padding: 20px;
+            padding: 30px;
+            background: #f5f5f5;
         }
-        h1 {
-            margin-bottom: 20px;    
-            color: #333;
+
+        /* 图片容器 */
+        .img-box {
+            width: 600px;
+            height: 400px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #zoom-img {
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+
+        /* 进度条 */
+        .progress-wrap {
+            width: 600px;
+            margin-top: 20px;
             text-align: center;
         }
-        .img-container{
+        .progress-text {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #2196F3;
+            width: 12.5%; /* 0.5-5倍范围，初始1倍对应12.5% */
+            transition: width 0.3s ease;
+        }
+
+        /* 🔴 核心：按钮样式，强制放大+占满宽度，不影响功能 */
+        .btn-wrap {
+            width: 600px; /* 和图片/进度条同宽 */
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        .btn-wrap button {
+            flex: 1; /* 两个按钮平分整个宽度 */
+            padding: 24px 0; /* 超高内边距，按钮直接变大 */
+            font-size: 32px; /* 超大字体 */
+            font-weight: bold;
+            background: #ffffff;
+            color: #333333;
+            border: 3px solid #2196F3;
+            border-radius: 16px;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.3s;
+            /* 强制清除浏览器默认按钮样式，100%生效 */
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
-        .shi-img{
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 90%;
-            height: auto;
+        .btn-wrap button:hover {
+            background: #f0f0f0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
         }
-        .img-container.enlarge{
-            transform: scale(1.2);
+        .btn-wrap button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
-    <h1>点击图片变形</h1>
-    <div class="img-container" onclick="toggleImage(this)">
-    <img src="shi.jpg" alt = "可爱的doro" class="shi-img">     
-</div>
-    <script>
-        let isEnlarged = false;
-        function toggleImage(imgDiv)
-        {
-            if(isEnlarged){
-                imgDiv.classList.remove("enlarge");
-                isEnlarged = false;
-                
-            }else{
-                imgDiv.classList.add("enlarge");
-                isEnlarged = true;
+    <div class="img-box">
+        <!-- 替换成你自己的图片路径！ -->
+        <img id="zoom-img" src="shi.jpg" alt="示例图片">
+    </div>
 
-            }
+    <div class="progress-wrap">
+        <div class="progress-text">当前缩放比例：100%</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- 按钮组，绑定正确的ID -->
+    <div class="btn-wrap">
+        <button id="zoom-in">放大</button>
+        <button id="zoom-out">缩小</button>
+    </div>
+
+    <script>
+        // 1. 正确获取DOM元素，确保ID完全匹配
+        const img = document.getElementById('zoom-img');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.querySelector('.progress-text');
+
+        // 2. 初始化缩放参数（核心配置，完全正常）
+        let currentScale = 1; // 当前缩放比例，初始1:1
+        const scaleStep = 0.5; // 每次点击缩放0.5倍（50%）
+        const minScale = 0.5; // 最小50%
+        const maxScale = 5; // 最大500%
+
+        // 3. 核心更新函数，确保缩放+进度条100%正常
+        function updateScale() {
+            // 图片缩放
+            img.style.transform = `scale(${currentScale})`;
+            // 进度条百分比计算（适配0.5-5倍范围）
+            const progressPercent = ((currentScale - minScale) / (maxScale - minScale)) * 100;
+            progressFill.style.width = `${progressPercent}%`;
+            // 更新比例文本
+            progressText.textContent = `当前缩放比例：${Math.round(currentScale * 100)}%`;
         }
+
+        // 4. 按钮点击事件，确保放大/缩小完全正常
+        zoomInBtn.addEventListener('click', () => {
+            if (currentScale < maxScale) {
+                currentScale = Math.min(currentScale + scaleStep, maxScale);
+                updateScale();
+            }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            if (currentScale > minScale) {
+                currentScale = Math.max(currentScale - scaleStep, minScale);
+                updateScale();
+            }
+        });
+
+        // 5. 可选：鼠标滚轮缩放，不影响按钮功能
+        img.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                currentScale = Math.min(currentScale + scaleStep, maxScale);
+            } else {
+                currentScale = Math.max(currentScale - scaleStep, minScale);
+            }
+            updateScale();
+        });
+
+        // 6. 页面加载时初始化，确保初始状态正确
+        updateScale();
     </script>
 </body>
 </html>
