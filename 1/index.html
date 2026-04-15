@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爱吃粑粑a</title>
+    <title>爱吃粑粑v1.0.0</title>
     <style>
         /* 全局重置，强制覆盖所有默认样式 */
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             font-family: "微软雅黑", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
         body {
             display: flex;
@@ -27,13 +30,15 @@
             max-width: 600px;
             height: 60vh;
             min-height: 350px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            
         }
         #zoom-img {
             max-width: 100%;
@@ -82,20 +87,17 @@
             padding: clamp(18px, 5vw, 24px) 0; /* 超高内边距，按钮直接变大 */
             font-size: clamp(24px, 6vw, 32px); /* 超大字体 */
             font-weight: bold;
-            background: #ffffff;
+            background: #fff;
             color: #333333;
             border: 3px solid #2196F3;
-            border-radius: clamp(12px, 6vw, 32px);
+            border-radius: clamp(12px, 3vw, 16px);
             cursor: pointer;
-            transition: all 0.3s;
-            /* 强制清除浏览器默认按钮样式，100%生效 */
-            -webkit-appearance: none !important;
-            appearance: none !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s;
         }
         .btn-wrap button:hover {
+            transform: translateY(-2px);
             background: #f0f0f0;
-            transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         .btn-wrap button:active {
@@ -105,7 +107,7 @@
     </style>
 </head>
 <body>
-    <div class="img-box">
+    <div class="img-box" id = "imgBox">
         <!-- 替换成你自己的图片路径！ -->
         <img id="zoom-img" src="shi.jpg" alt="示例图片">
     </div>
@@ -130,12 +132,27 @@
         const zoomOutBtn = document.getElementById('zoom-out');
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.querySelector('.progress-text');
-
+        const imgBox = document.getElementById('imgBox');
+        
         // 2. 初始化缩放参数（核心配置，完全正常）
         let currentScale = 1; // 当前缩放比例，初始1:1
         const scaleStep = 0.25; // 每次点击缩放0.5倍（50%）
         const minScale = 0.5; // 最小50%
         const maxScale = 3; // 最大300%
+
+        const images = [
+            "shi.jpg",
+            "luo.jpg",
+            "yuans.jpg"
+        ];
+        let currentIndex = 0;
+        imgBox.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % images.length;
+            img.src = images[currentIndex];
+            currentScale = 1;
+            updateScale();
+        });
+        
 
         // 3. 核心更新函数，确保缩放+进度条100%正常
         function updateScale() {
@@ -171,12 +188,27 @@
                 const touch1 = e.touches[0];
                 const touch2 = e.touches[1];
                 touchStartDistance = Math.hypot(
-                    touch1.clientX - touch1.clientX,
+                    touch2.clientX - touch1.clientX,
                     touch2.clientY - touch1.clientY
                 );
                 initialScale = currentScale;
             }
-        })
+        });
+
+        img.addEventListener('touchmove', (e) => {
+            if(e.touches.length === 2){
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientX
+                );
+                const scale = (currentDistance / touchStartDistance) * initialScale;
+                currentScale = Math.max(minScale, Math.min(scale, maxScale));
+                updateScale();
+            }
+        });
 
         // 5. 可选：鼠标滚轮缩放，不影响按钮功能
         img.addEventListener('wheel', (e) => {
@@ -189,8 +221,8 @@
             updateScale();
         });
 
-        // 6. 页面加载时初始化，确保初始状态正确
-        updateScale();
+        window.addEventListener('load', updateScale);
+
     </script>
 </body>
 </html>
