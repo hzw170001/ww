@@ -16,14 +16,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px;
+            padding: 15px;
             background: #f5f5f5;
+            overflow-x: hidden;
         }
 
         /* 图片容器 */
         .img-box {
-            width: 600px;
-            height: 400px;
+            width: 100%;
+            max-width: 600px;
+            height: 60vh;
+            min-height: 350px;
             border: 2px solid #ddd;
             border-radius: 8px;
             background: #fff;
@@ -41,18 +44,19 @@
 
         /* 进度条 */
         .progress-wrap {
-            width: 600px;
+            width: 100%;
+            max-width: 600px;
             margin-top: 20px;
             text-align: center;
         }
         .progress-text {
-            font-size: 24px;
+            font-size: clamp(18px, 5vw, 24px);
             color: #333;
             font-weight: bold;
         }
         .progress-bar {
             width: 100%;
-            height: 12px;
+            height: clamp(10px, 2vw, 12px);
             background: #ddd;
             border-radius: 6px;
             overflow: hidden;
@@ -61,41 +65,42 @@
         .progress-fill {
             height: 100%;
             background: #2196F3;
-            width: 12.5%; /* 0.5-5倍范围，初始1倍对应12.5% */
+            width: 25%; /* 0.5-5倍范围，初始1倍对应12.5% */
             transition: width 0.3s ease;
         }
 
         /* 🔴 核心：按钮样式，强制放大+占满宽度，不影响功能 */
         .btn-wrap {
-            width: 600px; /* 和图片/进度条同宽 */
+            width: 100%; /* 和图片/进度条同宽 */
+            max-width: 600px;
             margin-top: 20px;
             display: flex;
-            gap: 15px;
+            gap: clamp(10px, 3vw, 15px);
         }
         .btn-wrap button {
             flex: 1; /* 两个按钮平分整个宽度 */
-            padding: 24px 0; /* 超高内边距，按钮直接变大 */
-            font-size: 32px; /* 超大字体 */
+            padding: clamp(18px, 5vw, 24px) 0; /* 超高内边距，按钮直接变大 */
+            font-size: clamp(24px, 6vw, 32px); /* 超大字体 */
             font-weight: bold;
             background: #ffffff;
             color: #333333;
             border: 3px solid #2196F3;
-            border-radius: 16px;
+            border-radius: clamp(12px, 6vw, 32px);
             cursor: pointer;
             transition: all 0.3s;
             /* 强制清除浏览器默认按钮样式，100%生效 */
             -webkit-appearance: none !important;
             appearance: none !important;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         .btn-wrap button:hover {
             background: #f0f0f0;
             transform: translateY(-3px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         .btn-wrap button:active {
             transform: translateY(0);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -128,9 +133,9 @@
 
         // 2. 初始化缩放参数（核心配置，完全正常）
         let currentScale = 1; // 当前缩放比例，初始1:1
-        const scaleStep = 0.5; // 每次点击缩放0.5倍（50%）
+        const scaleStep = 0.25; // 每次点击缩放0.5倍（50%）
         const minScale = 0.5; // 最小50%
-        const maxScale = 5; // 最大500%
+        const maxScale = 3; // 最大300%
 
         // 3. 核心更新函数，确保缩放+进度条100%正常
         function updateScale() {
@@ -157,6 +162,21 @@
                 updateScale();
             }
         });
+
+        let touchStartDistance = 0;
+        let initialScale = 1;
+        img.addEventListener('touchstart', (e) => {
+            if(e.touches.length === 2){
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                touchStartDistance = Math.hypot(
+                    touch1.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                initialScale = currentScale;
+            }
+        })
 
         // 5. 可选：鼠标滚轮缩放，不影响按钮功能
         img.addEventListener('wheel', (e) => {
