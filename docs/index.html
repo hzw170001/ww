@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爱吃粑粑v1.0.2</title>
+    <title>爱吃粑粑v1.0.3</title>
     <style>
         /* 全局重置，强制覆盖所有默认样式 */
         * {
@@ -127,6 +127,17 @@
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        a{
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover{
+            color: #1976d2;
+            text-decoration: underline;
+        }
+
+
         @media (max-width: 768px){
             .wrap{
                 flex-direction: column;
@@ -163,14 +174,16 @@
     </div>
         </div>
     <div class="right">
-        <h2>图纸说明</h2>
+        <h2>图片说明</h2>
         <p>1. 点击图片可切换下一张</p>
         <p>2. 点击放大/缩小按钮控制比例</p>
         <p>3. 手机双指可直接缩放</p>
         <p>4. 进度条显示当前缩放比例</p>
         <p>5. 循环播放,最后一张回到第一张</p>
-        <p>6. 扣1送地狱火</p>
-        <br>
+        <p>6. <a href="https://www.bilibili.com/video/BV1MN4y1R74j" target="_blank" style="color: #6495ED; text-decoration: none; font-weight: normal;"
+        onmouseover="this.style.textDecoration= 'underline'"
+        onmouseout="this.style.textDecoration= 'none'">扣1送地狱火</a></p>
+        
     </div>
     </div>
     <script>
