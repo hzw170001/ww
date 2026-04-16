@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爱吃粑粑v1.0.1</title>
+    <title>爱吃粑粑v1.0.2</title>
     <style>
         /* 全局重置，强制覆盖所有默认样式 */
         * {
@@ -146,7 +146,7 @@
         <div class="left">
     <div class="img-box" id = "imgBox">
         <!-- 替换成你自己的图片路径！ -->
-        <img id="zoom-img" src="shi.jpg" alt="示例图片">
+        <img id="zoom-img" src="img/pao1.jpg" alt="示例图片">
     </div>
 
     <div class="progress-wrap">
@@ -189,14 +189,25 @@
         const maxScale = 3; // 最大300%
 
         const images = [
-            "shi.jpg",
-            "luo.jpg",
-            "yuans.jpg"
+            {src: "img/pao1.jpg", name: "1"},
+            {src: "img/pao2.jpg", name: "2"},
+            {src: "img/pao3.jpg", name: "3"},
+            {src: "img/pao4.jpg", name: "4"},
+            {src: "img/pao5.jpg", name: "5"},
+            {src: "img/pao6.jpg", name: "6"},
+            {src: "img/pao7.jpg", name: "7"},
+            {src: "img/pao8.jpg", name: "8"},
+            {src: "img/pao9.jpg", name: "9"},
+            {src: "img/susu.jpg", name: "10"},
+            {src: "img/weigui.jpg", name: "11"}
         ];
         let currentIndex = 0;
+        const imgElement = document.getElementById("zoom-img");
+        
         imgBox.addEventListener('click', () => {
             currentIndex = (currentIndex + 1) % images.length;
-            img.src = images[currentIndex];
+            imgElement.src = images[currentIndex].src;
+            document.querySelector(".progress-text").textContent = `当前: ${images[currentIndex].name} 缩放比例: ${Math.round(currentScale * 100)}%`;
             currentScale = 1;
             updateScale();
         });
@@ -205,12 +216,12 @@
         // 3. 核心更新函数，确保缩放+进度条100%正常
         function updateScale() {
             // 图片缩放
-            img.style.transform = `scale(${currentScale})`;
+            imgElement.style.transform = `scale(${currentScale})`;
             // 进度条百分比计算（适配0.5-5倍范围）
             const progressPercent = ((currentScale - minScale) / (maxScale - minScale)) * 100;
             progressFill.style.width = `${progressPercent}%`;
             // 更新比例文本
-            progressText.textContent = `当前缩放比例：${Math.round(currentScale * 100)}%`;
+           document.querySelector(".progress-text").textContent = `当前: ${images[currentIndex].name} 缩放比例: ${Math.round(currentScale * 100)}%`;
         }
 
         // 4. 按钮点击事件，确保放大/缩小完全正常
