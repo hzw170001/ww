@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爱吃粑粑v1.0.3</title>
+    <title>爱吃粑粑v1.0.4</title>
     <style>
         /* 全局重置，强制覆盖所有默认样式 */
         * {
@@ -196,7 +196,6 @@
         const imgBox = document.getElementById('imgBox');
         
         // 2. 初始化缩放参数（核心配置，完全正常）
-        let currentScale = 1; // 当前缩放比例，初始1:1
         const scaleStep = 0.25; // 每次点击缩放0.5倍（50%）
         const minScale = 0.5; // 最小50%
         const maxScale = 3; // 最大300%
@@ -214,27 +213,50 @@
             {src: "img/susu.jpg", name: "10"},
             {src: "img/weigui.jpg", name: "11"}
         ];
-        let currentIndex = 0;
+
+        //本地储存读取数据
+        function getLocalStorageData(){
+            const savedIndex = localStorage.getItem('imgCurrentIndex');
+            const savedScale = localStorage.getItem('imgCurrentScale');
+            return{
+                index: savedIndex ? parseInt(savedIndex) : 0,  //默认0
+                scale: savedScale ? parseFloat(savedScale) : 1  //默认1
+            };
+        }
+        //本地保存数据
+        function saveToLocalStorage(index, scale){
+            localStorage.setItem('imgCurrentIndex', index);
+            localStorage.setItem('imgCurrentScale', scale);
+        }
+        //初始化数据
+        const initData = getLocalStorageData();
+        let currentIndex = initData.index;
+        let currentScale = initData.scale;
         const imgElement = document.getElementById("zoom-img");
-        
+        //初始化图片显示
+        imgElement.src = images[currentIndex].src;
+
         imgBox.addEventListener('click', () => {
             currentIndex = (currentIndex + 1) % images.length;
             imgElement.src = images[currentIndex].src;
-            document.querySelector(".progress-text").textContent = `当前: ${images[currentIndex].name} 缩放比例: ${Math.round(currentScale * 100)}%`;
+            //切换图片大小比例重置成1
             currentScale = 1;
             updateScale();
+            //保存最新状态到本地
+            saveToLocalStorage(currentIndex, currentScale);
         });
-        
-
-        // 3. 核心更新函数，确保缩放+进度条100%正常
-        function updateScale() {
-            // 图片缩放
+        //更新函数
+        function updateScale(){
+            //图片缩放
             imgElement.style.transform = `scale(${currentScale})`;
-            // 进度条百分比计算（适配0.5-5倍范围）
+            //进度条计算
             const progressPercent = ((currentScale - minScale) / (maxScale - minScale)) * 100;
             progressFill.style.width = `${progressPercent}%`;
-            // 更新比例文本
-           document.querySelector(".progress-text").textContent = `当前: ${images[currentIndex].name} 缩放比例: ${Math.round(currentScale * 100)}%`;
+            //更新比例文本
+            document.querySelector(".progress-text").textContent = `当前: ${images[currentIndex].name} 缩放比例: ${Math.round(currentScale * 100)}%`;
+            //保持缩放储存到本地
+            saveToLocalStorage(currentIndex, currentScale);
+
         }
 
         // 4. 按钮点击事件，确保放大/缩小完全正常
@@ -274,7 +296,7 @@
                 const touch2 = e.touches[1];
                 const currentDistance = Math.hypot(
                     touch2.clientX - touch1.clientX,
-                    touch2.clientY - touch1.clientX
+                    touch2.clientY - touch1.clientY
                 );
                 const scale = (currentDistance / touchStartDistance) * initialScale;
                 currentScale = Math.max(minScale, Math.min(scale, maxScale));
@@ -283,7 +305,7 @@
         });
 
        
-
+        //页面加载更新缩放状态
         window.addEventListener('load', updateScale);
 
     </script>
